@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>    
+    <UseWindowsForms>true</UseWindowsForms>    
+    <Platforms>AnyCPU;x64</Platforms>    
+    <SignAssembly>False</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Macro Deck 2">
+      <HintPath>P:\Users\agise\AppData\Local\Programs\Macro Deck\Macro Deck 2.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
