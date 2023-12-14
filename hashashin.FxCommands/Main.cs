@@ -30,7 +30,7 @@ namespace hashashin.FxCommands
             public override string Name => "FxCommand";
 
             // A short description what the action can do
-            public override string Description => "Envia un comando a la consola de Fivem, no añadir el / al principio";
+            public override string Description => "Envía un comando a la consola del cliente de Fivem, no añadir el / al principio";
 
             // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
             public override bool CanConfigure => true;
