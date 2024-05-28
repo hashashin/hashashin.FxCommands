@@ -1,0 +1,12 @@
+﻿{
+  "type": "Plugin",
+  "name": "FxCommands",
+  "author": "hashashin",
+  "packageId": "hashashin.FxCommands",
+  "version": "0.0.1",
+  "target-plugin-api-version": 40,
+  "target-macro-deck-version": "2.13.1",
+  "dll": "hashashin.FxCommands.dll",
+  "repository": "https://github.com/hashashin/hashashin.FxCommands",
+  "author-discord-userid": "230053659550023682"
+}
