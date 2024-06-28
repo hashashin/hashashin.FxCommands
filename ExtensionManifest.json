@@ -3,7 +3,7 @@
   "name": "FxCommands",
   "author": "hashashin",
   "packageId": "hashashin.FxCommands",
-  "version": "0.0.1",
+  "version": "0.1",
   "target-plugin-api-version": 40,
   "target-macro-deck-version": "2.13.1",
   "dll": "hashashin.FxCommands.dll",
