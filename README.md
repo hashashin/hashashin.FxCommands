@@ -1,1 +1,1 @@
-FxCommands plugin for Macro Deck 2 based on: https://github.com/EggRP/fxcommands
+Macro Deck 2 plugin for sending commands to the FiveM client console based on: https://github.com/EggRP/fxcommands
