@@ -8,7 +8,7 @@
   "icon": "ExtensionIcon.png",
   "entrypoints": {
     "win-x64": {
-      "executable": "hashashin.FxCommands.dll",
+      "executable": "runtimes/win-x64/hashashin.FxCommands.dll",
       "runtime": {
         "kind": "FrameworkDependent",
         "dotnetVersion": "10.0"
