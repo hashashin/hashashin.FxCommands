@@ -6,14 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseAppHost>false</UseAppHost>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0-*" />
-    <PackageReference Include="MacroDeck.Plugin.Serilog" Version="3.0.0-*" />
-    <PackageReference Include="MacroDeck.Plugin.Analyzers" Version="3.0.0-*" PrivateAssets="all" />
+    <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0-beta.13" />
+    <PackageReference Include="MacroDeck.Plugin.Serilog" Version="3.0.0-beta.13" />
+    <PackageReference Include="MacroDeck.Plugin.Analyzers" Version="3.0.0-beta.13" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,7 +3,7 @@
   "manifestVersion": 1,
   "id": "com.hashashin.fxcommands",
   "name": "FxCommands",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Send commands to the FiveM or RedM client console.",
   "icon": "ExtensionIcon.png",
   "entrypoints": {
