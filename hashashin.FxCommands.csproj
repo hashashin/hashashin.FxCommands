@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="ExtensionIcon.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="ExtensionIcon.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
