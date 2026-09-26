@@ -1,4 +1,4 @@
-﻿// MIT License
+// MIT License
 
 // Copyright (c) 2022 EggRP
 
@@ -7,115 +7,44 @@
 // The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
+
 using System.Net.Sockets;
 using System.Text;
 
-namespace hashashin.FxCommands
+namespace hashashin.FxCommands;
+
+internal sealed class ConnectionManager
 {
-    internal class ConnectionManager
+    public async Task SendMessageAsync(string message, CancellationToken cancellationToken)
     {
-        private static Dictionary<string,
-        TcpClient> tcpClients = new Dictionary<string,
-        TcpClient>(10);
+        const string ipAddress = "127.0.0.1";
+        const int port = 29200; // FiveM/RedM console
 
-        public void SendMessage(string message, bool canRetry = true)
+        byte[] header = "43:4d:4e:44:00:d2:00:00"
+            .Split(':')
+            .Select(s => byte.Parse(s, System.Globalization.NumberStyles.HexNumber))
+            .ToArray(); // CMND 0x00d20000
+        byte[] command = Encoding.UTF8.GetBytes(message + "\n");
+        byte[] padding = [0, 0];
+        byte[] length = BitConverter.GetBytes(message.Length + 13);
+        byte[] terminator = [0];
+
+        Array.Reverse(length); // flip flop
+
+        byte[] data = header
+            .Concat(length)
+            .Concat(padding)
+            .Concat(command)
+            .Concat(terminator)
+            .ToArray();
+
+        using var tcpClient = new TcpClient
         {
-            string ipAddress = "127.0.0.1";
-            int port = 29200; // fx console
+            NoDelay = true
+        };
 
-            byte[] b_header = "43:4d:4e:44:00:d2:00:00".Split(':').Select(s => byte.Parse(s, System.Globalization.NumberStyles.HexNumber)).ToArray(); // CMND 0x00d20000
-            byte[] b_command = Encoding.UTF8.GetBytes(message + "\n");
-            byte[] b_padding = {
-                0,
-                0
-            };
-            byte[] b_length = BitConverter.GetBytes((message.Length + 13));
-            byte[] b_terminator = {
-                00
-            };
-
-            Array.Reverse(b_length); // flip flop
-
-            byte[] data = b_header.Concat(b_length).Concat(b_padding).Concat(b_command).Concat(b_terminator).ToArray(); // build message
-
-            string tcpClientIdentifier = $"{ipAddress}::{port}";
-
-            try
-            {
-                IPEndPoint ep = new IPEndPoint(IPAddress.Parse(ipAddress), port);
-
-                if (!tcpClients.ContainsKey(tcpClientIdentifier))
-                {
-                    tcpClients.Add(tcpClientIdentifier, new TcpClient()
-                    {
-                        NoDelay = true
-                    });
-                }
-                else
-                {
-                    IPGlobalProperties ipProperties = IPGlobalProperties.GetIPGlobalProperties();
-                    // Confirm connection is still valid
-                    TcpConnectionInformation[] tcpConnections = ipProperties.GetActiveTcpConnections().Where(x => x.LocalEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.LocalEndPoint) && x.RemoteEndPoint.Equals(tcpClients[tcpClientIdentifier].Client.RemoteEndPoint)).ToArray();
-
-                    if (tcpConnections != null && tcpConnections.Length > 0)
-                    {
-                        TcpState stateOfConnection = tcpConnections.First().State;
-                        if (stateOfConnection != TcpState.Established)
-                        {
-                            // No active connection, lets create a new one
-                            tcpClients[tcpClientIdentifier].Close();
-                            tcpClients[tcpClientIdentifier].Dispose();
-                            tcpClients[tcpClientIdentifier] = new TcpClient()
-                            {
-                                NoDelay = true
-                            };
-                        }
-                    }
-                }
-
-                if (!tcpClients[tcpClientIdentifier].Connected)
-                {
-                    tcpClients[tcpClientIdentifier].Connect(ep);
-                }
-
-                if (tcpClients[tcpClientIdentifier].Connected)
-                {
-                    var tcpStream = tcpClients[tcpClientIdentifier].GetStream();
-                    tcpStream.Write(data, 0, data.Length);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                // Catch and reset client if there is a socket issue to prevent button from crashing
-                tcpClients[tcpClientIdentifier].Close();
-                tcpClients[tcpClientIdentifier].Dispose();
-                tcpClients[tcpClientIdentifier] = new TcpClient()
-                {
-                    NoDelay = true
-                };
-                Console.WriteLine(ex.ToString());
-            }
-        }
-
-        public void InitializeClients()
-        {
-            tcpClients = new Dictionary<string,
-            TcpClient>();
-        }
-
-        public void Dispose()
-        {
-            foreach (var client in tcpClients.Values)
-            {
-                client.Close();
-                client.Dispose();
-            }
-        }
+        await tcpClient.ConnectAsync(ipAddress, port, cancellationToken).ConfigureAwait(false);
+        await using var tcpStream = tcpClient.GetStream();
+        await tcpStream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
     }
 }

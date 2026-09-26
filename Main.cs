@@ -1,54 +1,71 @@
-﻿using SuchByte.MacroDeck.ActionButton;
-using SuchByte.MacroDeck.GUI.CustomControls;
-using SuchByte.MacroDeck.GUI;
-using SuchByte.MacroDeck.Plugins;
-using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+using System.Net.Sockets;
+using MacroDeck.Localization;
+using MacroDeck.Sdk;
+using MacroDeck.Sdk.Actions;
+using MacroDeck.Sdk.Migration;
 
-namespace hashashin.FxCommands
+namespace hashashin.FxCommands;
+
+internal sealed class PluginIntegration : IPluginIntegration, IMigrationProvider
 {
-    public class Main : MacroDeckPlugin
+    public IReadOnlyList<IActionDefinition> Actions { get; } = [new FxCommandAction()];
+
+    public IReadOnlyList<IIntegrationMigration> Migrations { get; } = [new MacroDeck2Migration()];
+
+    public Task InitializeAsync(IIntegrationContext context) => Task.CompletedTask;
+
+    public Task ShutdownAsync() => Task.CompletedTask;
+}
+
+internal sealed class FxCommandAction : IActionDefinition
+{
+    public string Id => "fx-command";
+
+    public LocalizedText Name => "FxCommand";
+
+    public LocalizedText Description =>
+        "Send a command to the FiveM/RedM client console without the leading slash.";
+
+    public IReadOnlyList<ActionParameter> Parameters { get; } =
+    [
+        ActionParameter.Text("command", label: "Command", required: true)
+    ];
+
+    public IActionExecutor CreateExecutor() => new Executor();
+
+    private sealed class Executor : IActionExecutor
     {
-        public static MacroDeckPlugin Instance { get; internal set; }
-
-        // Optional; If your plugin can be configured, set to "true". It'll make the "Configure" button appear in the package manager.
-        public override bool CanConfigure => false;
-
-        // Gets called when the plugin is loaded
-        public override void Enable()
+        public async Task<ActionResult> ExecuteAsync(ActionExecutionContext context)
         {
-            this.Actions = new List<PluginAction>{
-            // add the instances of your actions here
-            new FxCommands(),
-            };
-        }
-
-        public class FxCommands : PluginAction
-        {
-            private ConnectionManager connectionManager;
-            // The name of the action
-            public override string Name => "FxCommand";
-
-            // A short description what the action can do
-            public override string Description => "Send a command to the Fivem client console, do not add the / at the beginning";
-
-            // Optional; Add if this action can be configured. This will make the ActionConfigurator calling GetActionConfigurator();
-            public override bool CanConfigure => true;
-            // Optional; Add if you added CanConfigure; Gets called when the action can be configured and the action got selected in the ActionSelector. You need to return a user control with the "ActionConfigControl" class as base class
-            public override ActionConfigControl GetActionConfigControl(ActionConfigurator actionConfigurator)
+            if (!context.Parameters.TryGetValue("command", out var value) ||
+                value is not string command ||
+                string.IsNullOrWhiteSpace(command))
             {
-                return new FxCommandsActionConfWnd(this);
+                return ActionResult.Failed(
+                    ActionErrorCodes.InvalidParameter,
+                    "A command is required.");
             }
 
-            // Gets called when the action is triggered by a button press or an event
-            public override void Trigger(string clientId, ActionButton actionButton)
+            try
             {
-                JObject configurationObject = JObject.Parse(this.Configuration);
-                var command = configurationObject["command"].ToString();
-                connectionManager = new ConnectionManager();
-                connectionManager.InitializeClients();
-                connectionManager.SendMessage(command);
-                connectionManager.Dispose();
+                await new ConnectionManager().SendMessageAsync(command, context.CancellationToken);
+                return ActionResult.Success();
+            }
+            catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (SocketException)
+            {
+                return ActionResult.Failed(
+                    ActionErrorCodes.NotConnected,
+                    "The FiveM/RedM client console is not reachable on 127.0.0.1:29200.");
+            }
+            catch (Exception)
+            {
+                return ActionResult.Failed(
+                    ActionErrorCodes.ProviderError,
+                    "The command could not be sent to the FiveM/RedM client console.");
             }
         }
     }

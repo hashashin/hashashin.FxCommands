@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schemas.macro-deck.app/plugin-manifest-v1.schema.json",
+  "manifestVersion": 1,
+  "id": "com.hashashin.fxcommands",
+  "name": "FxCommands",
+  "version": "0.2.0",
+  "description": "Send commands to the FiveM or RedM client console.",
+  "icon": "ExtensionIcon.png",
+  "entrypoints": {
+    "win-x64": {
+      "executable": "hashashin.FxCommands.dll",
+      "runtime": {
+        "kind": "FrameworkDependent",
+        "dotnetVersion": "10.0"
+      }
+    }
+  },
+  "publisher": {
+    "name": "hashashin"
+  },
+  "license": "MIT",
+  "compatibility": {
+    "macroDeck": ">=3.0.0-0"
+  },
+  "repository": "https://github.com/hashashin/hashashin.FxCommands"
+}

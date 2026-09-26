@@ -1,21 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>    
-    <UseWindowsForms>true</UseWindowsForms>    
-    <Platforms>AnyCPU;x64</Platforms>    
-    <SignAssembly>False</SignAssembly>    
-    <Version>0.1</Version>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseAppHost>false</UseAppHost>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="MacroDeck.Plugin.Hosting" Version="3.0.0-*" />
+    <PackageReference Include="MacroDeck.Plugin.Serilog" Version="3.0.0-*" />
+    <PackageReference Include="MacroDeck.Plugin.Analyzers" Version="3.0.0-*" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Macro Deck 2">
-      <HintPath>C:\Program Files\Macro Deck\Macro Deck 2.dll</HintPath>
-    </Reference>
+    <Content Include="manifest.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="ExtensionIcon.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
