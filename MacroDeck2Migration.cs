@@ -11,7 +11,9 @@ internal sealed class MacroDeck2Migration : IIntegrationMigration
 
     public IReadOnlyList<string> ClaimedActionSources { get; } = ["hashashin.FxCommands"];
 
-    public IReadOnlyList<string> ClaimedSettingsSources { get; } = ["hashashin_fxcommands"];
+    // Macro Deck 2 stored no plugin-level settings. Host and port are now
+    // action parameters, so there is no settings source to claim here.
+    public IReadOnlyList<string> ClaimedSettingsSources { get; } = [];
 
     public Task<ActionMigrationResult?> MigrateActionAsync(
         ForeignAction action,

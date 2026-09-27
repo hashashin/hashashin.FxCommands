@@ -1,5 +1,9 @@
 {
   "version": 1,
+  "include": [
+    "LICENSE.txt",
+    "README.md"
+  ],
   "targets": {
     "win-x64": {
       "executable": "dotnet",

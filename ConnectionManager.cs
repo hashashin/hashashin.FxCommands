@@ -9,42 +9,62 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.Net.Sockets;
-using System.Text;
 
 namespace hashashin.FxCommands;
 
 internal sealed class ConnectionManager
 {
-    public async Task SendMessageAsync(string message, CancellationToken cancellationToken)
+    public async Task SendMessageAsync(
+        string message,
+        FxConnectionOptions options,
+        CancellationToken cancellationToken)
     {
-        const string ipAddress = "127.0.0.1";
-        const int port = 29200; // FiveM/RedM console
-
-        byte[] header = "43:4d:4e:44:00:d2:00:00"
-            .Split(':')
-            .Select(s => byte.Parse(s, System.Globalization.NumberStyles.HexNumber))
-            .ToArray(); // CMND 0x00d20000
-        byte[] command = Encoding.UTF8.GetBytes(message + "\n");
-        byte[] padding = [0, 0];
-        byte[] length = BitConverter.GetBytes(message.Length + 13);
-        byte[] terminator = [0];
-
-        Array.Reverse(length); // flip flop
-
-        byte[] data = header
-            .Concat(length)
-            .Concat(padding)
-            .Concat(command)
-            .Concat(terminator)
-            .ToArray();
+        var data = FxCommandPacket.Build(message);
+        using var timeout = CreateTimeoutTokenSource(options.Timeout, cancellationToken);
 
         using var tcpClient = new TcpClient
         {
             NoDelay = true
         };
 
-        await tcpClient.ConnectAsync(ipAddress, port, cancellationToken).ConfigureAwait(false);
-        await using var tcpStream = tcpClient.GetStream();
-        await tcpStream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await tcpClient.ConnectAsync(options.Host, options.Port, timeout.Token).ConfigureAwait(false);
+            await using var tcpStream = tcpClient.GetStream();
+            await tcpStream.WriteAsync(data, timeout.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException();
+        }
+    }
+
+    public async Task TestConnectionAsync(
+        FxConnectionOptions options,
+        CancellationToken cancellationToken)
+    {
+        using var timeout = CreateTimeoutTokenSource(options.Timeout, cancellationToken);
+        using var tcpClient = new TcpClient
+        {
+            NoDelay = true
+        };
+
+        try
+        {
+            await tcpClient.ConnectAsync(options.Host, options.Port, timeout.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException();
+        }
+    }
+
+    private static CancellationTokenSource CreateTimeoutTokenSource(
+        TimeSpan timeout,
+        CancellationToken cancellationToken)
+    {
+        var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        source.CancelAfter(timeout);
+        return source;
     }
 }
