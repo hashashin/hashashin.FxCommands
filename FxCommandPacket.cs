@@ -5,20 +5,19 @@ namespace hashashin.FxCommands;
 
 internal static class FxCommandPacket
 {
-    private static readonly byte[] Header = [0x43, 0x4d, 0x4e, 0x44, 0x00, 0xd2, 0x00, 0x00];
+    private static readonly byte[] MagicAndProtocol = [0x43, 0x4d, 0x4e, 0x44, 0x00, 0xd3];
 
     public static byte[] Build(string message)
     {
         var command = Encoding.UTF8.GetBytes(message + "\n");
-        var packet = new byte[Header.Length + sizeof(int) + 2 + command.Length + 1];
+        var packet = new byte[MagicAndProtocol.Length + sizeof(int) + 2 + command.Length + 1];
 
-        Header.CopyTo(packet, 0);
+        MagicAndProtocol.CopyTo(packet, 0);
 
-        // The protocol length is the old ASCII length formula (message + 13),
-        // but it must use the number of UTF-8 bytes for non-ASCII commands.
-        BinaryPrimitives.WriteInt32BigEndian(packet.AsSpan(Header.Length, sizeof(int)), command.Length + 12);
+        // DevCon's CMND length is the UTF-8 command payload plus its trailing NUL.
+        BinaryPrimitives.WriteInt32BigEndian(packet.AsSpan(MagicAndProtocol.Length, sizeof(int)), command.Length + 1);
 
-        command.CopyTo(packet, Header.Length + sizeof(int) + 2);
+        command.CopyTo(packet, MagicAndProtocol.Length + sizeof(int) + 2);
         return packet;
     }
 }

@@ -12,6 +12,7 @@ public sealed class CommandNormalizerTests
     [TestCase("e wave", "e wave")]
     [TestCase(" /e wave ", "e wave")]
     [TestCase("/ e wave", "e wave")]
+    [TestCase("me a long action ; e smoke", "me a long action;e smoke")]
     public void Normalize_accepts_commands_with_or_without_a_leading_slash(
         string input,
         string expected)
@@ -39,10 +40,21 @@ public sealed class FxCommandPacketTests
         var command = Encoding.UTF8.GetBytes(message + "\n");
         var packet = FxCommandPacket.Build(message);
 
-        Assert.That(packet[..8], Is.EqualTo(new byte[] { 0x43, 0x4d, 0x4e, 0x44, 0x00, 0xd2, 0x00, 0x00 }));
-        Assert.That(BinaryPrimitives.ReadInt32BigEndian(packet.AsSpan(8, 4)), Is.EqualTo(command.Length + 12));
-        Assert.That(packet[14..^1], Is.EqualTo(command));
+        Assert.That(packet[..6], Is.EqualTo(new byte[] { 0x43, 0x4d, 0x4e, 0x44, 0x00, 0xd3 }));
+        Assert.That(BinaryPrimitives.ReadInt32BigEndian(packet.AsSpan(6, 4)), Is.EqualTo(command.Length + 1));
+        Assert.That(packet[12..^1], Is.EqualTo(command));
         Assert.That(packet[^1], Is.EqualTo((byte)0));
+    }
+
+    [Test]
+    public void Build_preserves_a_long_utf8_command_without_truncation()
+    {
+        var message = "me " + new string('x', 4000) + " áéíóú";
+        var expectedCommand = Encoding.UTF8.GetBytes(message + "\n");
+        var packet = FxCommandPacket.Build(message);
+
+        Assert.That(packet[12..^1], Is.EqualTo(expectedCommand));
+        Assert.That(BinaryPrimitives.ReadInt32BigEndian(packet.AsSpan(6, 4)), Is.EqualTo(expectedCommand.Length + 1));
     }
 }
 
