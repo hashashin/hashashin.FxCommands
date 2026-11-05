@@ -14,3 +14,4 @@ jobs:
       version: ${{ github.event.release.tag_name }}
       source: .
       changelog: ${{ github.event.release.body }}
+      cli-version: 3.0.0
