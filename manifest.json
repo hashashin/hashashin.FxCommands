@@ -3,7 +3,7 @@
   "manifestVersion": 1,
   "id": "com.hashashin.fxcommands",
   "name": "FxCommands",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Send commands to the FiveM or RedM client console.",
   "icon": "ExtensionIcon.png",
   "entrypoints": {
@@ -22,5 +22,10 @@
   "compatibility": {
     "macroDeck": ">=3.0.0-0"
   },
-  "repository": "https://github.com/hashashin/hashashin.FxCommands"
+  "repository": "https://github.com/hashashin/hashashin.FxCommands",
+  "ai": {
+    "interaction": false,
+    "generatedContent": false,
+    "generatedAssets": false
+  }
 }

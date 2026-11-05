@@ -1,5 +1,12 @@
 # FxCommands
 
+<a href="https://macro-deck.app/store/com.hashashin.fxcommands">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://assets.macro-deck.app/branding/Open%20in%20the%20Macro%20Deck%20Store%20Badge%20Dark.png">
+    <img alt="Open in the Macro Deck Store" src="https://assets.macro-deck.app/branding/Open%20in%20the%20Macro%20Deck%20Store%20Badge%20Light.png" height="56">
+  </picture>
+</a>
+
 Macro Deck 3 plugin for sending commands to the FiveM/RedM client console.
 
 The plugin uses the FiveM console protocol from
@@ -22,17 +29,17 @@ host and port use the new defaults unless changed in the action settings.
 
 ## Build and test
 
-This plugin targets .NET 10 and uses the Macro Deck 3 beta 14 SDK:
+This plugin targets .NET 10 and uses the Macro Deck 3.0.0 SDK:
 
 ```powershell
 dotnet build
 dotnet test
 ```
 
-To run it against the disposable Macro Deck 3 stub host, install the prerelease
-CLI and run:
+To run it against the disposable Macro Deck 3 stub host, install the CLI and
+run:
 
 ```powershell
-dotnet tool install --global MacroDeck.Plugin.Cli --prerelease
+dotnet tool install --global MacroDeck.Plugin.Cli
 macrodeck-plugin run --project hashashin.FxCommands.csproj --stub-host
 ```
